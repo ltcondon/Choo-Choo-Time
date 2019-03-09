@@ -12,6 +12,7 @@
 
   var database = firebase.database(); 
   var table = $("#train-table-body"); 
+  var trainsPresent = false;
 
 
   //Assign Values 
@@ -23,6 +24,7 @@
 
   //Firebase reference when page loads 
   database.ref().on("child_added", function(snapshot){
+    trainsPresent = true;
     console.log(snapshot.val().trainName);
         trainName = snapshot.val().trainName; 
         destination = snapshot.val().destination; 
@@ -44,10 +46,9 @@
         // Append row to table
         table.append(newRow);
   });
-
      
 
-  // new train added
+  // When 'Add Train' is clicked:
   $("#add-train-btn").on("click", function(event) {
 
     event.preventDefault()
@@ -59,38 +60,28 @@
 
   // Time calculations and conversions
 
-    // First Time (pushed back 1 year to make sure it comes before current time)
     var firstTrainConverted = moment(firstTrain, "HH:mm").subtract(1, "years");
-
-    // Current Time
     var currentTime = moment();
-
-    // Difference between the times
     var timeDifference = moment().diff(moment(firstTrainConverted), "minutes");
-
-    // Time apart (remainder)
     var timeApart = timeDifference % frequency;
-    console.log(timeApart);
-
-    // Minute Until Train
     var minutesAway = frequency - timeApart;
+    minutesAway = minutesAway.toLocaleString();
 
-    // Next Train
-    var nextTrain = moment().add(minutesAway, "minutes");
+    var nextTrain = moment(nextTrain).format("hh:mm");
+    nextTrain = nextTrain.toLocaleString();
 
     console.log(trainName)
     console.log(destination)
     console.log(firstTrain)
     console.log(frequency)
     console.log(firstTrainConverted);
-    console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
-    console.log("DIFFERENCE IN TIME: " + timeDifference);
-    console.log("MINUTES TILL TRAIN: " + minutesAway);
-    console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
+    console.log("current time: " + moment(currentTime).format("hh:mm"));
+    console.log("next train in  " + minutesAway + " minutes");
+    console.log("next train arrives at: " + moment(nextTrain).format("hh:mm"));
 
 
 
-    // Code for the push
+  // Pushing everything to Firebase
     database.ref().push({
 
         trainName: trainName,
@@ -103,4 +94,27 @@
       });
 });
 
-
+    if (trainsPresent === true) {
+        setInterval(function() {
+            console.log(snapshot.val().trainName);
+            trainName = snapshot.val().trainName; 
+            destination = snapshot.val().destination; 
+            firstTrain = snapshot.val().firstTrain; 
+            frequency = snapshot.val().frequency; 
+            nextTrain = snapshot.val().nextTrain;
+            minutesAway = snapshot.val().minutesAway;
+            
+    
+            //Append data to rows 
+            var newRow = $("<tr>");
+            newRow.append("<td>" + trainName + "</td>");
+            newRow.append("<td>" + destination + "</td>");
+            newRow.append("<td>" + frequency + "</td>");
+            newRow.append("<td>" + nextTrain + "</td>");
+            newRow.append("<td>" + minutesAway + "</td>");
+    
+    
+            // Append row to table
+            table.append(newRow);
+        }, 30000);
+    };
