@@ -1,0 +1,21 @@
+body {
+    background-image: url(../images/hogwarts-1.jpg);
+    background-attachment: fixed;
+    background-position-y: center;
+    background-repeat: no-repeat;
+}
+
+#Train-table th,
+td {
+  display: inline-block;
+  width: 16.575%;
+}
+
+#train-table-body td {
+  display: inline-block;
+  width: 16.575%;
+}
+
+.card {
+  background-color: rgba(231, 218, 218, 0.75)
+}
